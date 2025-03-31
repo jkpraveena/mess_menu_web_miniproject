@@ -1,0 +1,76 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2 text-center">
+        <div class="card shadow-lg">
+            <div class="card-body">
+                <h1 class="display-4 mb-4">Mess Menu Formation System</h1>
+                <p class="lead">Streamline student dining with our comprehensive mess menu management solution</p>
+                
+                <div class="my-5">
+                    <div class="row g-4 text-start">
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <i class="fas fa-user-plus fa-2x text-primary me-3"></i>
+                                        <h3 class="card-title mb-0">Student Registration</h3>
+                                    </div>
+                                    <p class="card-text">Register with your details including registration number, name, block, and room number.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <i class="fas fa-utensils fa-2x text-success me-3"></i>
+                                        <h3 class="card-title mb-0">Mess Selection</h3>
+                                    </div>
+                                    <p class="card-text">Choose your dining preferences from various mess options including Veg, Non-Veg, Special, and Night Mess.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <i class="fas fa-lightbulb fa-2x text-warning me-3"></i>
+                                        <h3 class="card-title mb-0">Food Suggestions</h3>
+                                    </div>
+                                    <p class="card-text">Suggest your favorite food items and rate their feasibility for mass production.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <i class="fas fa-chart-bar fa-2x text-info me-3"></i>
+                                        <h3 class="card-title mb-0">Reports</h3>
+                                    </div>
+                                    <p class="card-text">Generate and view reports based on students, meals, weekly, or monthly data in Excel or PDF formats.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.is_admin %}
+                            <a href="{{ url_for('admin') }}" class="btn btn-primary btn-lg px-4 me-2">Admin Dashboard</a>
+                        {% else %}
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg px-4 me-2">Student Dashboard</a>
+                        {% endif %}
+                    {% else %}
+                        <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg px-4 me-2">Register Now</a>
+                        <a href="{{ url_for('login') }}" class="btn btn-outline-secondary btn-lg px-4">Login</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

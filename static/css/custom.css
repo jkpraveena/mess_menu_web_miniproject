@@ -1,0 +1,168 @@
+/**
+ * Custom CSS for the Mess Menu Formation System
+ */
+
+/* Navbar custom styling */
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+/* Card styling */
+.card {
+    margin-bottom: 1.5rem;
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card-header {
+    font-weight: bold;
+}
+
+/* Stats cards on admin dashboard */
+.border-left-primary {
+    border-left: 0.25rem solid var(--bs-primary) !important;
+}
+
+.border-left-success {
+    border-left: 0.25rem solid var(--bs-success) !important;
+}
+
+.border-left-warning {
+    border-left: 0.25rem solid var(--bs-warning) !important;
+}
+
+.border-left-info {
+    border-left: 0.25rem solid var(--bs-info) !important;
+}
+
+/* Form customization */
+.form-label {
+    font-weight: 500;
+}
+
+/* Custom range styling */
+.range {
+    position: relative;
+    width: 100%;
+}
+
+/* Table styling */
+.table th {
+    font-weight: bold;
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Button customization */
+.btn {
+    border-radius: 4px;
+}
+
+.btn-lg {
+    padding: 0.75rem 1.5rem;
+}
+
+/* Footer styling */
+footer {
+    padding: 1.5rem 0;
+    margin-top: 3rem;
+}
+
+/* Page header styling */
+.page-header {
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+    background-color: var(--bs-primary);
+    color: white;
+    border-radius: 0.5rem;
+}
+
+/* Active navigation link */
+.nav-link.active {
+    font-weight: bold;
+    color: var(--bs-primary) !important;
+}
+
+/* Dashboard cards height */
+.dashboard-card {
+    height: 100%;
+    min-height: 320px;
+}
+
+/* Report section styling */
+.report-section {
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+/* Custom alert styling */
+.alert {
+    border-radius: 0.5rem;
+}
+
+/* Food suggestion form */
+.feasibility-rating {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+}
+
+/* Custom tooltip styling */
+.custom-tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.custom-tooltip .tooltip-text {
+    visibility: hidden;
+    width: 200px;
+    background-color: var(--bs-dark);
+    color: white;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -100px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.custom-tooltip:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Custom badge styling */
+.badge {
+    font-weight: 500;
+    padding: 0.5em 0.75em;
+}
+
+/* List group styling */
+.list-group-item {
+    display: flex;
+    align-items: center;
+}
+
+/* Icon spacing in lists */
+.list-group-item i, 
+.card-body i {
+    margin-right: 0.5rem;
+}
+
+/* Animation for alerts */
+.alert {
+    animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}

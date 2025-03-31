@@ -1,0 +1,230 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h2 class="mb-0"><i class="fas fa-file-export me-2"></i>Generate Reports</h2>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('report') }}" id="reportForm">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="report_type" class="form-label">Report Type <span class="text-danger">*</span></label>
+                                <select class="form-select" id="report_type" name="report_type" required>
+                                    <option value="" selected disabled>-- Select Report Type --</option>
+                                    <option value="student">Student-wise Report</option>
+                                    <option value="meal">Meal-wise Report</option>
+                                    <option value="weekly">Weekly Menu Report</option>
+                                    <option value="monthly">Monthly Menu Report</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="format_type" class="form-label">Format <span class="text-danger">*</span></label>
+                                <select class="form-select" id="format_type" name="format_type" required>
+                                    <option value="" selected disabled>-- Select Format --</option>
+                                    <option value="excel">Excel (.xlsx)</option>
+                                    <option value="pdf">PDF</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <!-- Dynamic filter options will be shown here based on report type -->
+                            <div id="filterContainer">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Please select a report type to see filtering options.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">Generate Report</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card mt-4 shadow">
+            <div class="card-header bg-info">
+                <h3 class="mb-0"><i class="fas fa-question-circle me-2"></i>Report Types Explained</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h4><i class="fas fa-user me-2 text-primary"></i>Student-wise Report</h4>
+                                <p>Shows a specific student's mess preferences and food suggestions over time.</p>
+                            </div>
+                        </div>
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h4><i class="fas fa-utensils me-2 text-success"></i>Meal-wise Report</h4>
+                                <p>Aggregates food suggestions by meal type (breakfast, lunch, etc.) with popularity metrics.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h4><i class="fas fa-calendar-week me-2 text-warning"></i>Weekly Menu Report</h4>
+                                <p>Shows the complete menu plan for a specific week with all meal types and mess options.</p>
+                            </div>
+                        </div>
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h4><i class="fas fa-calendar-alt me-2 text-danger"></i>Monthly Menu Report</h4>
+                                <p>Provides a monthly overview of all menus with trends and statistics on food items.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const reportType = document.getElementById('report_type');
+        const filterContainer = document.getElementById('filterContainer');
+        
+        reportType.addEventListener('change', function() {
+            const selectedType = this.value;
+            let filterHTML = '';
+            
+            switch(selectedType) {
+                case 'student':
+                    filterHTML = `
+                        <div class="mb-3">
+                            <label for="filter_type" class="form-label">Filter By <span class="text-danger">*</span></label>
+                            <select class="form-select" id="filter_type" name="filter_type" required>
+                                <option value="reg_no" selected>Registration Number</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="filter_value" class="form-label">Registration Number <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="filter_value" name="filter_value" required>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'meal':
+                    filterHTML = `
+                        <div class="mb-3">
+                            <label for="filter_type" class="form-label">Filter By <span class="text-danger">*</span></label>
+                            <select class="form-select" id="filter_type" name="filter_type" required>
+                                <option value="meal_type" selected>Meal Type</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="filter_value" class="form-label">Meal Type <span class="text-danger">*</span></label>
+                            <select class="form-select" id="filter_value" name="filter_value" required>
+                                <option value="" selected disabled>Select Meal Type</option>
+                                {% for type in meal_types %}
+                                <option value="{{ type.id }}">{{ type.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'weekly':
+                    const currentDate = new Date();
+                    const currentWeek = Math.ceil(currentDate.getDate() / 7);
+                    
+                    filterHTML = `
+                        <div class="mb-3">
+                            <label for="week" class="form-label">Week Number <span class="text-danger">*</span></label>
+                            <select class="form-select" id="week" name="week" required>
+                                <option value="1" ${currentWeek === 1 ? 'selected' : ''}>Week 1</option>
+                                <option value="2" ${currentWeek === 2 ? 'selected' : ''}>Week 2</option>
+                                <option value="3" ${currentWeek === 3 ? 'selected' : ''}>Week 3</option>
+                                <option value="4" ${currentWeek === 4 ? 'selected' : ''}>Week 4</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="month" class="form-label">Month <span class="text-danger">*</span></label>
+                            <select class="form-select" id="month" name="month" required>
+                                ${generateMonthOptions(currentDate.getMonth() + 1)}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="year" class="form-label">Year <span class="text-danger">*</span></label>
+                            <select class="form-select" id="year" name="year" required>
+                                ${generateYearOptions(currentDate.getFullYear())}
+                            </select>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'monthly':
+                    const currentMonthDate = new Date();
+                    
+                    filterHTML = `
+                        <div class="mb-3">
+                            <label for="month" class="form-label">Month <span class="text-danger">*</span></label>
+                            <select class="form-select" id="month" name="month" required>
+                                ${generateMonthOptions(currentMonthDate.getMonth() + 1)}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="year" class="form-label">Year <span class="text-danger">*</span></label>
+                            <select class="form-select" id="year" name="year" required>
+                                ${generateYearOptions(currentMonthDate.getFullYear())}
+                            </select>
+                        </div>
+                    `;
+                    break;
+                    
+                default:
+                    filterHTML = `
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Please select a report type to see filtering options.
+                        </div>
+                    `;
+            }
+            
+            filterContainer.innerHTML = filterHTML;
+        });
+        
+        function generateMonthOptions(currentMonth) {
+            const months = [
+                {value: 1, name: 'January'},
+                {value: 2, name: 'February'},
+                {value: 3, name: 'March'},
+                {value: 4, name: 'April'},
+                {value: 5, name: 'May'},
+                {value: 6, name: 'June'},
+                {value: 7, name: 'July'},
+                {value: 8, name: 'August'},
+                {value: 9, name: 'September'},
+                {value: 10, name: 'October'},
+                {value: 11, name: 'November'},
+                {value: 12, name: 'December'}
+            ];
+            
+            return months.map(month => 
+                `<option value="${month.value}" ${month.value === currentMonth ? 'selected' : ''}>${month.name}</option>`
+            ).join('');
+        }
+        
+        function generateYearOptions(currentYear) {
+            let options = '';
+            for (let year = currentYear - 2; year <= currentYear + 1; year++) {
+                options += `<option value="${year}" ${year === currentYear ? 'selected' : ''}>${year}</option>`;
+            }
+            return options;
+        }
+    });
+</script>
+{% endblock %}

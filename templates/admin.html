@@ -1,0 +1,306 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-user-shield fa-3x me-3"></i>
+                    <div>
+                        <h2 class="mb-0">Admin Dashboard</h2>
+                        <p class="mb-0">Manage the mess menu system</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <!-- Statistics Cards -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Registered Students</div>
+                        <div class="h5 mb-0 font-weight-bold">{{ student_count }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-users fa-2x text-primary"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            Total Suggestions</div>
+                        <div class="h5 mb-0 font-weight-bold">{{ suggestion_count }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-lightbulb fa-2x text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                            Pending Suggestions</div>
+                        <div class="h5 mb-0 font-weight-bold">{{ pending_suggestions }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-clock fa-2x text-warning"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Menu Management
+                        </div>
+                        <div class="row no-gutters align-items-center">
+                            <div class="col">
+                                <a href="{{ url_for('admin_menu') }}" class="btn btn-sm btn-info">Manage Menus</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-clipboard-list fa-2x text-info"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <!-- Charts -->
+    <div class="col-md-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header bg-primary">
+                <h5 class="mb-0 text-white"><i class="fas fa-chart-pie me-2"></i>Mess Type Distribution</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="messTypeChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header bg-success">
+                <h5 class="mb-0 text-white"><i class="fas fa-chart-bar me-2"></i>Meal Type Distribution</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="mealTypeChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Recent Suggestions -->
+    <div class="col-md-12">
+        <div class="card shadow">
+            <div class="card-header bg-warning">
+                <h5 class="mb-0 text-dark"><i class="fas fa-lightbulb me-2"></i>Recent Food Suggestions</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Food Item</th>
+                                <th>Student</th>
+                                <th>Meal Type</th>
+                                <th>Feasibility</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for suggestion in recent_suggestions %}
+                            <tr>
+                                <td>{{ suggestion.food_item }}</td>
+                                <td>{{ suggestion.student.name }} ({{ suggestion.student.reg_no }})</td>
+                                <td>{{ suggestion.meal_type.name }}</td>
+                                <td>{{ suggestion.feasibility_score }}/5</td>
+                                <td>{{ suggestion.created_at.strftime('%Y-%m-%d') }}</td>
+                                <td>
+                                    {% if suggestion.approved %}
+                                    <span class="badge bg-success">Approved</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">Pending</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if not suggestion.approved %}
+                                    <a href="{{ url_for('approve_suggestion', suggestion_id=suggestion.id) }}" class="btn btn-sm btn-success">
+                                        <i class="fas fa-check"></i> Approve
+                                    </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="text-center mt-3">
+                    <a href="{{ url_for('admin_suggestions') }}" class="btn btn-outline-warning">View All Suggestions</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <!-- Quick Actions -->
+    <div class="col-md-12">
+        <div class="card shadow">
+            <div class="card-header bg-info">
+                <h5 class="mb-0 text-white"><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <div class="d-grid">
+                            <a href="{{ url_for('admin_menu') }}" class="btn btn-outline-primary btn-lg">
+                                <i class="fas fa-edit me-2"></i>Manage Menu
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="d-grid">
+                            <a href="{{ url_for('admin_suggestions') }}" class="btn btn-outline-success btn-lg">
+                                <i class="fas fa-check-double me-2"></i>Review Suggestions
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="d-grid">
+                            <a href="{{ url_for('report') }}" class="btn btn-outline-warning btn-lg">
+                                <i class="fas fa-file-export me-2"></i>Generate Reports
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="d-grid">
+                            <a href="#" class="btn btn-outline-danger btn-lg">
+                                <i class="fas fa-cog me-2"></i>System Settings
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Mess Type Distribution Chart
+        const messTypeData = {{ mess_preferences|safe }};
+        const messTypeLabels = Object.keys(messTypeData);
+        const messTypeValues = Object.values(messTypeData);
+        
+        const messTypeCtx = document.getElementById('messTypeChart').getContext('2d');
+        new Chart(messTypeCtx, {
+            type: 'pie',
+            data: {
+                labels: messTypeLabels,
+                datasets: [{
+                    data: messTypeValues,
+                    backgroundColor: [
+                        'rgba(75, 192, 192, 0.6)',
+                        'rgba(255, 99, 132, 0.6)',
+                        'rgba(255, 206, 86, 0.6)',
+                        'rgba(54, 162, 235, 0.6)'
+                    ],
+                    borderColor: [
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(54, 162, 235, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Mess Preference Distribution'
+                    }
+                }
+            }
+        });
+        
+        // Meal Type Distribution Chart
+        const mealTypeData = {{ meal_suggestions|safe }};
+        const mealTypeLabels = Object.keys(mealTypeData);
+        const mealTypeValues = Object.values(mealTypeData);
+        
+        const mealTypeCtx = document.getElementById('mealTypeChart').getContext('2d');
+        new Chart(mealTypeCtx, {
+            type: 'bar',
+            data: {
+                labels: mealTypeLabels,
+                datasets: [{
+                    label: 'Number of Suggestions',
+                    data: mealTypeValues,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Food Suggestions by Meal Type'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

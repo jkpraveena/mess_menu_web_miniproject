@@ -1,0 +1,101 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card shadow">
+            <div class="card-header bg-warning text-dark">
+                <h2 class="mb-0"><i class="fas fa-lightbulb me-2"></i>Food Suggestion Form</h2>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('food_suggestion') }}">
+                    <div class="mb-4">
+                        <div class="mb-3">
+                            <label for="food_item" class="form-label">Food Item Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="food_item" name="food_item" required>
+                            <div class="form-text">Suggest a food item you'd like to see in the mess menu.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="meal_type" class="form-label">Meal Type <span class="text-danger">*</span></label>
+                            <select class="form-select" id="meal_type" name="meal_type" required>
+                                <option value="" selected disabled>-- Select Meal Type --</option>
+                                {% for type in meal_types %}
+                                <option value="{{ type.id }}">{{ type.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">Select the meal for which this food item would be appropriate.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="feasibility_score" class="form-label">Feasibility for Mass Production <span class="text-danger">*</span></label>
+                            <div class="range">
+                                <input type="range" class="form-range" min="1" max="5" step="1" id="feasibility_score" name="feasibility_score" value="3">
+                                <div class="d-flex justify-content-between small text-muted">
+                                    <span>Difficult (1)</span>
+                                    <span>Medium (3)</span>
+                                    <span>Easy (5)</span>
+                                </div>
+                            </div>
+                            <div class="form-text">Rate how feasible it would be to prepare this item for a large number of students.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Current Rating: <span id="ratingValue">3</span>/5</label>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-warning btn-lg">Submit Suggestion</button>
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">Back to Dashboard</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card mt-4 shadow">
+            <div class="card-header bg-info">
+                <h3 class="mb-0"><i class="fas fa-info-circle me-2"></i>Guidelines for Food Suggestions</h3>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        Suggest items that can be prepared for large groups
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        Consider nutritional value and dietary requirements
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        Be specific about the ingredients and preparation
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        Rate feasibility honestly for better menu planning
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        Prioritize seasonal and locally available ingredients
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const rangeInput = document.getElementById('feasibility_score');
+        const ratingValue = document.getElementById('ratingValue');
+        
+        // Update rating value when slider changes
+        rangeInput.addEventListener('input', function() {
+            ratingValue.textContent = this.value;
+        });
+    });
+</script>
+{% endblock %}
