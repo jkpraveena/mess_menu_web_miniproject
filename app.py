@@ -37,5 +37,6 @@ with app.app_context():
     # Import models here to avoid circular imports
     import models
     
-    # Create database tables
+    # Drop all tables and create them again (reset the database)
+    db.drop_all()
     db.create_all()
