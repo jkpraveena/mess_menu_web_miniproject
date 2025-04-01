@@ -9,6 +9,24 @@ from app import app, db
 from models import User, Student, MessType, MealType, MessPreference, FoodSuggestion, Menu
 from utils import generate_excel_report, generate_pdf_report
 
+# Helper function to serialize objects for JSON response
+def serialize_object(obj):
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    
+    if hasattr(obj, '__dict__'):
+        result = {}
+        for key, value in obj.__dict__.items():
+            if key.startswith('_'):  # Skip SQLAlchemy internal attributes
+                continue
+            if isinstance(value, list):
+                result[key] = [serialize_object(item) for item in value]
+            else:
+                result[key] = serialize_object(value)
+        return result
+    
+    return obj
+
 # Initialize database with default data
 def initialize_db():
     # Add mess types if they don't exist
@@ -166,13 +184,23 @@ def dashboard():
 def update_mess_preference():
     student = Student.query.filter_by(user_id=current_user.id).first()
     if not student:
+        if request.is_json:
+            return jsonify({'error': 'Student profile not found'}), 404
         flash('Student profile not found', 'danger')
         return redirect(url_for('dashboard'))
     
-    mess_name = request.form.get('mess_name')
-    mess_type_id = request.form.get('mess_type')
+    # Check if the request is a JSON request (from React) or form data
+    if request.is_json:
+        data = request.get_json()
+        mess_name = data.get('mess_name')
+        mess_type_id = data.get('mess_type')
+    else:
+        mess_name = request.form.get('mess_name')
+        mess_type_id = request.form.get('mess_type')
     
     if not mess_name or not mess_type_id:
+        if request.is_json:
+            return jsonify({'error': 'All fields are required'}), 400
         flash('All fields are required', 'danger')
         return redirect(url_for('dashboard'))
     
@@ -184,6 +212,9 @@ def update_mess_preference():
     )
     db.session.add(preference)
     db.session.commit()
+    
+    if request.is_json:
+        return jsonify({'success': True, 'message': 'Mess preference updated successfully'})
     
     flash('Mess preference updated successfully', 'success')
     return redirect(url_for('dashboard'))
@@ -469,3 +500,72 @@ def view_menu():
     menus = menus.all()
     
     return render_template('menu.html', menus=menus, meal_types=meal_types, mess_types=mess_types)
+
+# API endpoint for dashboard data
+@app.route('/api/dashboard_data')
+@login_required
+def dashboard_data():
+    if current_user.is_admin:
+        return jsonify({'error': 'Admin users do not have a dashboard'})
+    
+    student = Student.query.filter_by(user_id=current_user.id).first()
+    if not student:
+        return jsonify({'error': 'Student profile not found'})
+    
+    # Get current mess preference
+    mess_preference = MessPreference.query.filter_by(student_id=student.id).order_by(MessPreference.created_at.desc()).first()
+    
+    # Get student's food suggestions
+    suggestions = FoodSuggestion.query.filter_by(student_id=student.id).order_by(FoodSuggestion.created_at.desc()).all()
+    
+    # Get mess types for dropdown
+    mess_types = MessType.query.all()
+    
+    # Prepare response data with serialization
+    student_data = {
+        'id': student.id,
+        'reg_no': student.reg_no,
+        'name': student.name,
+        'block': student.block,
+        'room_number': student.room_number
+    }
+    
+    mess_preference_data = None
+    if mess_preference:
+        mess_preference_data = {
+            'id': mess_preference.id,
+            'mess_name': mess_preference.mess_name,
+            'created_at': mess_preference.created_at.isoformat(),
+            'mess_type': {
+                'id': mess_preference.mess_type.id,
+                'name': mess_preference.mess_type.name
+            }
+        }
+    
+    suggestions_data = []
+    for suggestion in suggestions:
+        suggestions_data.append({
+            'id': suggestion.id,
+            'food_item': suggestion.food_item,
+            'feasibility_score': suggestion.feasibility_score,
+            'approved': suggestion.approved,
+            'created_at': suggestion.created_at.isoformat(),
+            'meal_type': {
+                'id': suggestion.meal_type.id,
+                'name': suggestion.meal_type.name
+            }
+        })
+    
+    mess_types_data = []
+    for mess_type in mess_types:
+        mess_types_data.append({
+            'id': mess_type.id,
+            'name': mess_type.name
+        })
+    
+    return jsonify({
+        'student': student_data,
+        'mess_preference': mess_preference_data,
+        'suggestions': suggestions_data,
+        'mess_types': mess_types_data
+    })
